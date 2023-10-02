@@ -56,6 +56,21 @@ private:
 
   // get the next character from the stream
   void read();
+
+  // consume a character after it is matched
+  void consume();
+
+  // skip insignificant / non-token input
+  void skip();
+
+  // attempt to match a single character token, return true on success
+  bool lex_single();
+
+  // attempt to match a number
+  bool lex_number();
+
+  // attempt to match a keyword or an id
+  bool lex_kw_or_id();
 };
 
 #endif
