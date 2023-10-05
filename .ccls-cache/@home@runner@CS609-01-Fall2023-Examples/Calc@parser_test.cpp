@@ -9,5 +9,5 @@ int main()
   Lexer *lex = new Lexer(std::cin);
   Parser parser(lex);
 
-  parser.parse();
+  parser.parse()->print(0);
 }
