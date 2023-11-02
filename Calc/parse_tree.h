@@ -1,7 +1,41 @@
 // File: parse_tree.h
 // Purpose: Class definitions for all of the elements of our parse tree.
+#ifndef PARSE_TREE_H
+#define PARSE_TREE_H
 #include <vector>
 #include "lexer.h"
+#include "ref_env.h"
+
+// class prototype
+class Ref_Env;
+
+//////////////////////////////////////////
+// Evaluation Results
+//////////////////////////////////////////
+enum EvalType {VOID, INTEGER, REAL, UNDEFINED};
+class EvalResult
+{
+public:
+  EvalResult();
+
+  // set the type and zero the value
+  virtual void set_type(EvalType _type);
+
+  // set the value and infer the type
+  virtual void set(int _i);
+  virtual void set(double _d);
+
+  // type coercion functions
+  virtual int as_integer();
+  virtual double as_real();
+
+  // retrieve the type
+  virtual EvalType type();
+private:
+  int _i;          // an integer
+  double _d;       // a real number
+  EvalType _type;  // the type
+};
 
 //////////////////////////////////////////
 // Pure Virtual Base Class
@@ -9,6 +43,8 @@
 //////////////////////////////////////////
 class Parse_Tree {
 public:
+  virtual ~Parse_Tree();
+  virtual EvalResult eval(Ref_Env *env) = 0;
   virtual void print(int indent) const = 0;  // <- =0 syntax indicates pure virtual
 };
 
@@ -18,6 +54,9 @@ public:
 //////////////////////////////////////////
 class UnaryOp : public Parse_Tree {
 public:
+  // destructor
+  virtual ~UnaryOp();
+
   // accessor and mutator for the child
   virtual Parse_Tree* child() const;
   virtual void child(Parse_Tree *_child);
@@ -29,6 +68,9 @@ private:
 
 class BinaryOp : public Parse_Tree {
 public:
+  // destructor
+  virtual ~BinaryOp();
+
   // accessor and mutator for the children
   virtual Parse_Tree* left() const;
   virtual void left(Parse_Tree *_left);
@@ -43,6 +85,9 @@ private:
 
 class NaryOp : public Parse_Tree {
 public:
+  //destructor
+  virtual ~NaryOp();
+
   // add a child
   void add(Parse_Tree *child);
 
@@ -59,43 +104,51 @@ private:
 //////////////////////////////////////////
 class Program : public NaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 
 class Add : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 
 class Subtract : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 class Multiply : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 class Divide : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 class Mod : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 class Power : public BinaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
 class Negation: public UnaryOp {
 public:
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 };
 
@@ -103,7 +156,43 @@ class Literal : public Parse_Tree {
 public:
   Literal(const Lexer_Token &tok);
 
+  virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;
 private:
   Lexer_Token _tok;
 };
+
+class Variable : public Parse_Tree {
+public:
+  Variable(const Lexer_Token &tok);
+
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+
+  virtual void set(Ref_Env *env, EvalResult value);
+  virtual std::string name();
+private:
+  Lexer_Token _tok;
+};
+
+
+class Assignment : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Display : public UnaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Input : public UnaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+#endif

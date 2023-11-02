@@ -13,9 +13,47 @@ Parser (Context-Free)
 
 < Program' > ::=  < Statement > < Program' > 
                   | ""
-                
-< Statement >    ::= < Expression > NEWLINE
 
+< Statement >    ::= < Statement-Body > NEWLINE
+< Statement-Body > ::= < Ref > < Statement' > 
+                     | < IO-Operation > 
+                     | < Record-Decl > 
+                     | < Branch >
+                     | < Loop >
+                     | < Expression > 
+                     | ""
+
+< Statement' >   ::= EQUAL < Statement'' > 
+                     | < Factor' > < Term' > < Expression' >
+
+< Statement'' >  ::= < Expression > 
+                     | < Record-Inst >
+                     
+< Record-Inst >  ::= NEW ID
+
+< IO-Operation > ::= DISPLAY < Expression >
+                     | INPUT ID
+                     
+< Record-Decl >  ::= RECORD ID NEWLINE < Field-List > END RECORD
+
+< Field-List >   ::= < Field-List > < Field >
+                     | < Field >
+
+< Field >        ::= FIELD ID NEWLINE
+
+< Branch >       ::= IF < Condition > NEWLINE < Program > END IF
+
+< Loop >         ::= WHILE < Condition > NEWLINE < Program > END WHILE
+
+< Condition >    ::= < Expression > < Condition' >
+
+< Condition' >   ::= EQUAL < Expression >
+                     | NE < Expression >
+                     | LT  < Expression >
+                     | GT  < Expression >
+                     | LTE  < Expression >
+                     | GTE  < Expression >
+                     
 < Expression >   ::= < Term > < Expression' >
 
 < Expression' >  ::= PLUS < Term > < Expression' >
@@ -38,7 +76,12 @@ Parser (Context-Free)
                      | MINUS < Expression >
                      | < Number >
 
-< Number >       ::= INTLIT | REALLIT
+< Number >       ::= INTLIT | REALLIT | < Ref >
+
+< Ref >          ::= ID < Ref' >
+
+< Ref' >         ::= DOT ID < Ref' >
+                     | ""
 
 
 Lexer (Regular)
@@ -54,6 +97,22 @@ LPAREN         (
 RPAREN         )
 INTLIT         [0-9]+
 REALLIT        INTLIT.INTLIT
+EQUAL          =
+DISPLAY        display
+INPUT          input
+ID             (_ | [a-zA-Z]) (_|[a-zA-Z]|[0-9])*
+DOT            .
+NEW            new
+RECORD         record
+END            end
+FIELD          field
+IF             if
+WHILE          while
+NE             <>
+LT             <
+GT             >
+LTE            <=
+GTE            >=
 
 Hidden/Utilitiy Tokens
 ======================

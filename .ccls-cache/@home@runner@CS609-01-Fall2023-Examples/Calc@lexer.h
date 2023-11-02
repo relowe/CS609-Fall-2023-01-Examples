@@ -19,7 +19,23 @@ enum Token {
   LPAREN,
   RPAREN,
   INTLIT,
-  REALLIT
+  REALLIT,
+  EQUAL,
+  DISPLAY,
+  INPUT,
+  ID,
+  DOT,
+  NEW,
+  RECORD,
+  END,
+  FIELD,
+  IF,
+  WHILE,
+  NE,
+  LT,
+  GT,
+  LTE,
+  GTE
 };
 
 // Tokens as emitted by the lexer
@@ -71,6 +87,9 @@ private:
 
   // attempt to match a keyword or an id
   bool lex_kw_or_id();
+
+  // attempt to match a fixed-width unconstrained token
+  bool lex_fixed();
 };
 
 #endif

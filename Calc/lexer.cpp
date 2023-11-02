@@ -25,7 +25,7 @@ Lexer_Token::Lexer_Token(Token tok, const std::string &lexeme, int line,
 std::ostream &operator<<(std::ostream &os, const Lexer_Token &t) {
   static std::string token_label[] = {
       "INVALID", "EOI", "NEWLINE", "PLUS",   "MINUS",  "TIMES",  "DIVIDE",
-      "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT"};
+      "MOD",     "POW", "LPAREN",  "RPAREN", "INTLIT", "REALLIT", "EQUAL", "DISPLAY", "INPUT", "ID", "DOT", "NEW", "RECORD", "END", "FIELD", "IF", "WHILE", "NE", "LT", "GT", "LTE", "GTE"};
   return os << token_label[t.tok] << " \"" << t.lexeme << "\" Line: " << t.line
             << " Column " << t.col;
 }
@@ -59,6 +59,8 @@ Lexer_Token Lexer::next() {
   if (lex_single()) {
     // nothing to do
   } else if (lex_number()) {
+    // nothing to do
+  } else if(lex_fixed()) {
     // nothing to do
   } else if(lex_kw_or_id()) {
     // nothing to do
@@ -100,6 +102,13 @@ void Lexer::skip() {
   while(_is && _cur_char != '\n' && isspace(_cur_char)) {
     read();
   }
+
+  // skip comments
+  if(_cur_char == '#') {
+    while(_is && _cur_char != '\n') {
+      read();
+    }
+  }
 }
 
 // attempt to match a single character token, return true on success
@@ -114,6 +123,8 @@ bool Lexer::lex_single() {
   tokens['^'] = POW;
   tokens['('] = LPAREN;
   tokens[')'] = RPAREN;
+  tokens['='] = EQUAL;
+  tokens['.'] = DOT;
 
   // search for the current character in our map
   auto itr = tokens.find(_cur_char);
@@ -174,6 +185,14 @@ bool Lexer::lex_number() {
 bool Lexer::lex_kw_or_id() {
   std::map<std::string, Token> tokens;
   tokens["MOD"] = MOD;
+  tokens["display"] = DISPLAY;
+  tokens["input"] = INPUT;
+  tokens["new"] = NEW;
+  tokens["record"] = RECORD;
+  tokens["end"] = END;
+  tokens["field"] = FIELD;
+  tokens["if"] = IF;
+  tokens["while"] = WHILE;
 
   // check to see if it starts properly
   if(_cur_char != '_' and not isalpha(_cur_char)){return false;}
@@ -185,8 +204,38 @@ bool Lexer::lex_kw_or_id() {
   if(itr != tokens.end()) {
     _cur.tok = itr->second;
   } else {
-    _cur.tok = INVALID; // TODO: Fix this when we do varaibles
+    _cur.tok = ID; 
   }
 
   return true;
+}
+
+  
+// attempt to match a fixed-width unconstrained token
+bool Lexer::lex_fixed()
+{
+  // check for <
+  if(_cur_char == '<') {
+    _cur.tok = LT;
+    consume();
+    if(_cur_char == '>') {
+      _cur.tok = NE;
+      consume();
+    } else if(_cur_char == '=') {
+      _cur.tok = LTE;
+      consume();
+    }
+    return true;
+  } else if(_cur_char == '>') {
+    _cur.tok = GT;
+    consume();
+    if(_cur_char == '=') {
+      _cur.tok = GTE;
+      consume();
+    }
+
+    return true;
+  }
+
+  return false;
 }

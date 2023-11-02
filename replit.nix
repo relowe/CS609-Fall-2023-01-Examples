@@ -5,5 +5,8 @@
 		pkgs.ccls
 		pkgs.gdb
 		pkgs.gnumake
+    pkgs.ruby
+    pkgs.valgrind
+    pkgs.openjdk
 	];
 }

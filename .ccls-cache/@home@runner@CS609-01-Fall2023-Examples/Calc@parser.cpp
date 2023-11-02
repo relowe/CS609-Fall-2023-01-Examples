@@ -58,20 +58,88 @@ Parse_Tree* Parser::parse_Program() {
   Program *result = new Program();
   
   do {
-    result->add(parse_Statement());
+    Parse_Tree *statement = parse_Statement();
+    // ignore null statements
+    if(statement != nullptr) {
+      result->add(statement);
+    }
   } while (not has(EOI));
 
   return result;
 }
 
 /*
-< Statement >    ::= < Expression > NEWLINE
+< Statement >    ::= ID < Statement' > NEWLINE
+                     | < IO-Operation > NEWLINE
+                     | < Expression > NEWLINE
+                     | NEWLINE
  */
 Parse_Tree* Parser::parse_Statement() {
-  Parse_Tree *result = parse_Expression();
+  Parse_Tree *result;
+
+  if(has(NEWLINE)) {
+    consume();
+    return nullptr;
+  }
+
+  if(has(ID)) {
+    // get the ID from parse_Number
+    result = parse_Number();
+    result = parse_Statement2(result);
+  } else if(has(INPUT) or has(DISPLAY)) {
+    result = parse_IO_Operation();
+  } else {
+    result = parse_Expression();
+  }
+  
   must_be(NEWLINE);
   consume();
 
+  return result;
+}
+
+
+/*
+< Statement' >   ::= EQUAL < Expression > 
+                     | < Factor' > < Term' > < Expression' >
+*/
+Parse_Tree *Parser::parse_Statement2(Parse_Tree *left) 
+{
+  Parse_Tree *result;
+  
+  if(has(EQUAL)) {
+    // this an assignment
+    consume(); 
+    Assignment *result = new Assignment();
+    result->left(left);
+    result->right(parse_Expression());
+    return result;
+  } else {
+    result = parse_Factor2(left);
+    result = parse_Term2(result);
+    result = parse_Expression2(result);
+  }
+
+  return result;
+}
+
+/*
+< IO-Operation > ::= DISPLAY < Expression >
+                     | INPUT ID
+*/
+Parse_Tree* Parser::parse_IO_Operation() {
+  if(has(DISPLAY)) {
+    consume();
+    Display *result = new Display();
+    result->child(parse_Expression());
+    return result;
+  }
+
+  must_be(INPUT);
+  consume();
+  must_be(ID);
+  Input *result = new Input();
+  result->child(parse_Number());
   return result;
 }
 
@@ -192,13 +260,15 @@ Parse_Tree *Parser::parse_Base() {
 }
 
 /*
-< Number >       ::= INTLIT | REALLIT
+< Number >       ::= INTLIT | REALLIT | ID
 */
 Parse_Tree* Parser::parse_Number() {
   if (has(INTLIT)) {
     return new Literal(consume());
-  } else {
-    must_be(REALLIT);
+  } else if (has(REALLIT)) {
     return new Literal(consume());
+  } else {
+    must_be(ID);
+    return new Variable(consume());
   }
 }

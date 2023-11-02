@@ -35,6 +35,8 @@ private:
   //////////////////////////////////////////
   Parse_Tree* parse_Program();
   Parse_Tree* parse_Statement();
+  Parse_Tree* parse_Statement2(Parse_Tree *left);
+  Parse_Tree* parse_IO_Operation();
   Parse_Tree* parse_Expression();
   Parse_Tree* parse_Expression2(Parse_Tree *left);
   Parse_Tree* parse_Term();
