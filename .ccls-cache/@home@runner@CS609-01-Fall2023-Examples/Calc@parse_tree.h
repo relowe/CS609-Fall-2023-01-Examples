@@ -12,7 +12,7 @@ class Ref_Env;
 //////////////////////////////////////////
 // Evaluation Results
 //////////////////////////////////////////
-enum EvalType {VOID, INTEGER, REAL, UNDEFINED};
+enum EvalType {VOID, INTEGER, REAL, UNDEFINED, BOOLEAN};
 class EvalResult
 {
 public:
@@ -24,16 +24,19 @@ public:
   // set the value and infer the type
   virtual void set(int _i);
   virtual void set(double _d);
+  virtual void set(bool _b);
 
   // type coercion functions
   virtual int as_integer();
   virtual double as_real();
+  virtual bool as_bool();
 
   // retrieve the type
   virtual EvalType type();
 private:
   int _i;          // an integer
   double _d;       // a real number
+  bool _b;         // a boolean value
   EvalType _type;  // the type
 };
 
@@ -191,6 +194,89 @@ public:
 
 
 class Input : public UnaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Record_Instantiation : public UnaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Record_Declaration : public NaryOp {
+public:
+  Record_Declaration(const Lexer_Token &_tok);
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+  virtual std::string name();
+
+private:
+  Lexer_Token _tok;
+
+};
+
+
+class Branch : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Loop : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Equal : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Not_Equal : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Greater : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Less : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Less_or_Equal : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Greater_or_Equal : public BinaryOp {
+public:
+  virtual EvalResult eval(Ref_Env *env);
+  virtual void print(int indent) const;
+};
+
+
+class Record_Access : public BinaryOp {
 public:
   virtual EvalResult eval(Ref_Env *env);
   virtual void print(int indent) const;

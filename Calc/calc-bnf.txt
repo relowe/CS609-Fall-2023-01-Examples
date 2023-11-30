@@ -9,6 +9,7 @@
                        | < Record-Decl >
                        | < Branch >
                        | < Loop >
+                       | < Function-Def >
                        | ""
 
 < Assignment >   ::= < Ref > "=" < Expression >
@@ -29,6 +30,14 @@
 < Branch >       ::= "if" < Condition > "\n" < Program > "end" "if"
 
 < Loop >         ::= "while" < Condition > "\n" < Program > "end" "while"
+
+< Function-Def > ::= "fun" < Id > "(" < Param-List > ")" "\n" < Program > "end" "fun"
+
+< Param-List >   ::= < NV-Param-List >
+                     | ""
+
+< NV-Param-List > ::= < NV-Param-List > "," < Id >
+                      | < Id >
 
 < Condition >    ::= < Expression > "=" < Expression >
                      | < Expression > "<>" < Expression >
@@ -56,6 +65,7 @@
 < Number >       ::= < Integer-Lit >
                      | < Real-Lit >
                      | < Ref >
+                     | < Function-Call >
 
 < Integer-Lit >  ::= < Integer-Lit > < Digit >
                      | < Digit >
@@ -72,6 +82,14 @@
 
 < Ref >          ::= < Id > 
                      | < Ref > "." < Id >
+
+< Function-Call > ::= < Ref > "(" < Arg-List > ")"
+
+< Arg-List >      ::= < NV-Arg-List > 
+                      | ""
+
+< NV-Arg-List >   ::= < NV-Arg-List > "," < Expression > 
+                      | < Expression >
 
 < Digit >        ::= "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
 

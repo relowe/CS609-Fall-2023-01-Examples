@@ -35,7 +35,9 @@ private:
   //////////////////////////////////////////
   Parse_Tree* parse_Program();
   Parse_Tree* parse_Statement();
+  Parse_Tree* parse_Statement_Body();
   Parse_Tree* parse_Statement2(Parse_Tree *left);
+  Parse_Tree* parse_Statement3(Parse_Tree *left);
   Parse_Tree* parse_IO_Operation();
   Parse_Tree* parse_Expression();
   Parse_Tree* parse_Expression2(Parse_Tree *left);
@@ -45,4 +47,14 @@ private:
   Parse_Tree* parse_Factor2(Parse_Tree *left);
   Parse_Tree* parse_Base();
   Parse_Tree* parse_Number();
+  Parse_Tree* parse_Record_Decl();
+  Parse_Tree* parse_Field_List(Record_Declaration *decl);
+  Parse_Tree* parse_Field(Record_Declaration *decl);
+  Parse_Tree* parse_Record_Inst();
+  Parse_Tree* parse_Branch();
+  Parse_Tree* parse_Loop();
+  Parse_Tree* parse_Condition();
+  Parse_Tree* parse_Condition2(Parse_Tree *left);
+  Parse_Tree* parse_Ref();
+  Parse_Tree* parse_Ref2(Parse_Tree *left);
 };

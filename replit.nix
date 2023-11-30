@@ -1,5 +1,6 @@
 { pkgs }: {
 	deps = [
+   pkgs.unzip
 		pkgs.python39Full
   pkgs.clang_12
 		pkgs.ccls

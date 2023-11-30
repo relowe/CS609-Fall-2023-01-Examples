@@ -28,6 +28,12 @@ void EvalResult::set(double _d) {
   _type = REAL;
 }
 
+
+void EvalResult::set(bool _b) {
+  this->_b = _b;
+  _type = BOOLEAN;
+}
+
 // type coercion functions
 int EvalResult::as_integer() {
   if (_type == INTEGER) {
@@ -43,6 +49,11 @@ double EvalResult::as_real() {
   } else {
     return (double)_i;
   }
+}
+
+
+bool EvalResult::as_bool() {
+  return _b;
 }
 
 // retrieve the type
@@ -420,4 +431,330 @@ void Input::print(int indent) const {
   std::cout << "INPUT" << std::endl;
 
   child()->print(indent + 1);
+}
+
+
+
+EvalResult Record_Instantiation::eval(Ref_Env *env) {
+  EvalResult result;
+
+  //TODO: Implement this
+
+  return result;
+}
+
+
+void Record_Instantiation::print(int indent) const {
+  // print myself
+  std::cout << std::setw(indent) << "";
+  std::cout << "NEW";
+
+  child()->print(indent + 1);
+}
+
+
+Record_Declaration::Record_Declaration(const Lexer_Token &_tok) {
+  this->_tok = _tok;
+}
+
+
+std::string Record_Declaration::name() {
+  return _tok.lexeme;
+}
+
+EvalResult Record_Declaration::eval(Ref_Env *env) {
+  EvalResult result;
+
+  //TODO: Implement this
+
+  return result;
+}
+
+
+void Record_Declaration::print(int indent) const
+{
+  // print the indent
+  std::cout << std::setw(indent) << "";
+  std::cout << "Program" << std::endl;
+
+  // loop over the children
+  for (auto itr = begin(); itr != end(); itr++) {
+    (*itr)->print(indent + 1);
+  }
+}
+
+
+EvalResult Branch::eval(Ref_Env *env) {
+  EvalResult result;
+
+  if(left()->eval(env).as_bool()) {
+    right()->eval(env);
+  }
+
+  return result;
+}
+
+
+void Branch::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "IF" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Loop::eval(Ref_Env *env) {
+  EvalResult result;
+
+  while(left()->eval(env).as_bool()) {
+    right()->eval(env);
+  }
+
+  return result;
+}
+
+
+void Loop::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "WHILE" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Equal::eval(Ref_Env *env) {
+  EvalResult result;
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  // handle our types (TODO: This will become more complicated later)
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() == r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() == r.as_integer();
+    result.set(x);
+  }
+  return result;
+}
+
+
+void Equal::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "= (Compare)" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Not_Equal::eval(Ref_Env *env) {
+  EvalResult result;
+
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() != r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() != r.as_integer();
+    result.set(x);
+  }  
+  
+  return result;
+}
+
+
+void Not_Equal::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "<>" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Greater::eval(Ref_Env *env) {
+  EvalResult result;
+  
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() > r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() > r.as_integer();
+    result.set(x);
+  }
+
+  return result;
+}
+
+
+void Greater::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << ">" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Less::eval(Ref_Env *env) {
+  EvalResult result;
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  // handle our types (TODO: This will become more complicated later)
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() < r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() < r.as_integer();
+    result.set(x);
+  }
+
+  return result;
+}
+
+
+void Less::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "<" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Less_or_Equal::eval(Ref_Env *env) {
+  EvalResult result;
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  // handle our types (TODO: This will become more complicated later)
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() <= r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() <= r.as_integer();
+    result.set(x);
+  }
+
+  return result;
+}
+
+
+void Less_or_Equal::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << "<=" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Greater_or_Equal::eval(Ref_Env *env) {
+  EvalResult result;
+  EvalResult l = left()->eval(env);
+  EvalResult r = right()->eval(env);
+
+  // handle our types (TODO: This will become more complicated later)
+  if (l.type() == REAL or r.type() == REAL) {
+    // real arithmetic
+    bool x = l.as_real() >= r.as_real();
+    result.set(x);
+  } else {
+    // integer arithmetic
+    bool x = l.as_integer() >= r.as_integer();
+    result.set(x);
+  }
+
+  return result;
+}
+
+
+void Greater_or_Equal::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << ">=" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
+}
+
+
+EvalResult Record_Access::eval(Ref_Env *env) {
+  EvalResult result;
+
+  //TODO: Implement this
+
+  return result;
+}
+
+
+void Record_Access::print(int indent) const
+{
+  // print the right child
+  right()->print(indent + 1);
+
+  // indent and print ourself
+  std::cout << std::setw(indent) << "";
+  std::cout << ". (Access)" << std::endl;
+
+  // print the left child
+  left()->print(indent + 1);
 }
